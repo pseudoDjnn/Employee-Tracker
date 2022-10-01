@@ -45,5 +45,17 @@ function mainMenu() {
 }
 
 function vDepts() {
-  const sql = `SELECT `;
+  const sql = `SELECT dept_id AS id, dept_name AS name FROM dept`;
+  db.query(sql, (err, rows) => {
+    if (err) {
+      console.log(err.message);
+    }
+    console.log("");
+    console.table(rows);
+    setTimeout(() => {
+      mainMenu();
+    }, 750);
+  });
 }
+
+module.exports = init;
