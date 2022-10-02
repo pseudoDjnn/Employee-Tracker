@@ -1,4 +1,4 @@
-INSERT INTO dept (deptartment_name)
+INSERT INTO dept (department_name)
 VALUES
 ("Sales"),
 ("Customer Service"),
@@ -7,7 +7,7 @@ VALUES
 ("Web Development"),
 ("Executive Management");
 
-INSERT INTO emp_role (role_title, deptartment_id, role_salary)
+INSERT INTO emp_role (role_title, department_id, role_salary)
 VALUES
 ("Sales Representative", 1, 45000),
 ("Customer Service Representative", 2, 32000),

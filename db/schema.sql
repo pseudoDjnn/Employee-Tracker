@@ -4,15 +4,15 @@ DROP TABLE IF EXISTS dept;
 
 CREATE TABLE dept (
   dept_id INTEGER PRIMARY KEY AUTO_INCREMENT,
-  deptartment_name VARCHAR(75) NOT NULL
+  department_name VARCHAR(75) NOT NULL
 );
 
 CREATE TABLE emp_role (
   role_id INTEGER PRIMARY KEY AUTO_INCREMENT,
   role_title VARCHAR(100) NOT NULL,
-  deptartment_id INTEGER,
+  department_id INTEGER,
   role_salary INTEGER NOT NULL,
-  FOREIGN KEY (deptartment_id) REFERENCES dept(dept_id) ON DELETE CASCADE
+FOREIGN KEY (department_id) REFERENCES dept(dept_id) ON DELETE CASCADE
 );
 
 CREATE TABLE employees (

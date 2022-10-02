@@ -21,7 +21,7 @@ function mainMenu() {
   inquirer
     .prompt({
       type: "list",
-      name: "homePage",
+      name: "home",
       message: "Please slecect a choice.",
       choices: [
         "View our departments",
@@ -59,7 +59,7 @@ function mainMenu() {
 }
 
 function vDepts() {
-  const sql = `SELECT dept_id AS id, dept_name AS name FROM dept`;
+  const sql = `SELECT dept_id AS id, department_name AS name FROM dept`;
   db.query(sql, (err, rows) => {
     if (err) {
       console.log(err.message);
@@ -72,9 +72,35 @@ function vDepts() {
   });
 }
 
-function vRoles() {}
+function vRoles() {
+  const sql = `SELECT role_id AS id, role_title AS title, department_name AS name, role_salary AS salary FROM emp_role
+  LEFT JOIN dept ON emp_role.department_id = dept.dept_id`;
+  db.query(sql, (err, rows) => {
+    if (err) {
+      console.log(err.message);
+    }
+    console.log("");
+    console.table(rows);
+    setTimeout(() => {
+      mainMenu();
+    }, 800);
+  });
+}
 
-function vEmploy() {}
+function vEmploy() {
+  const sql = `SELECT e.emp_id AS id, concat(e.first_name,' ', e.last_name) AS employee, e.role_title AS title, e.role_salary AS salary, e.dept_name AS dept,
+  CASE WHEN e.manager_id = e.emp_id THEN concat('N/A') ELSE concat(u.first_name, ' ', u.last_name) END AS manager,
+  FROM (SELECT * FROM employess LEFT JOIN roles ON employees.role_id = roles.r_id LEFT JOIN dept ON roles.dept_id = dept.dept_id) AS e, employees u WHERE u.e_id = e.manager_id`;
+  db.query(sql, (err, rows) => {
+    if (err) {
+      console.log(err.message);
+    }
+    console.table(rows);
+    setTimeout(() => {
+      mainMenu();
+    }, 800);
+  });
+}
 
 function vEmployDept() {}
 
@@ -87,11 +113,11 @@ function aEmployee() {}
 function updateEmploy() {}
 
 function endInit() {
-  consoleTable.log("");
-  consoleTable.table("Thank you for using this application.");
+  console.log("");
+  console.log("Thank you for using this application.");
   setTimeout(() => {
     console.log("");
-    console.log("              Goodbye");
+    console.log("                             Goodbye.");
   }, 800);
   setTimeout(() => {
     process.exit(1);
