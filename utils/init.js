@@ -7,7 +7,7 @@ function init() {
   console.log(`
   ***********************************
   *                                 *
-  *          Employee Tracker       *
+  *         Employee Tracker        *
   *                                 *
   ***********************************
   `);
@@ -40,6 +40,20 @@ function mainMenu() {
         vDepts();
       } else if (home === "View all roles") {
         vRoles();
+      } else if (home === "List all employees") {
+        vEmploy();
+      } else if (home === "List employees by department") {
+        vEmployDept();
+      } else if (home === "Add role") {
+        aRole();
+      } else if (home === "Add department") {
+        aDept();
+      } else if (home === "Add employee") {
+        aEmploy();
+      } else if (home === "Update an exsisting employee") {
+        updateEmploy();
+      } else if (home === "Exit") {
+        initEnd();
       }
     });
 }
@@ -56,6 +70,18 @@ function vDepts() {
       mainMenu();
     }, 750);
   });
+}
+
+function initEnd() {
+  consoleTable.log("");
+  consoleTable.table("Thank you for using this application.");
+  setTimeout(() => {
+    console.log("");
+    console.log("              Goodbye");
+  }, 800);
+  setTimeout(() => {
+    process.exit(1);
+  }, 1500);
 }
 
 module.exports = init;
