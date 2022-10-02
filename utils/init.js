@@ -49,11 +49,11 @@ function mainMenu() {
       } else if (home === "Add department") {
         aDept();
       } else if (home === "Add employee") {
-        aEmploy();
+        aEmployee();
       } else if (home === "Update an exsisting employee") {
         updateEmploy();
       } else if (home === "Exit") {
-        initEnd();
+        endInit();
       }
     });
 }
@@ -72,7 +72,21 @@ function vDepts() {
   });
 }
 
-function initEnd() {
+function vRoles() {}
+
+function vEmploy() {}
+
+function vEmployDept() {}
+
+function aRole() {}
+
+function aDept() {}
+
+function aEmployee() {}
+
+function updateEmploy() {}
+
+function endInit() {
   consoleTable.log("");
   consoleTable.table("Thank you for using this application.");
   setTimeout(() => {
