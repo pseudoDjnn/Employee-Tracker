@@ -3,7 +3,7 @@ const init = require("./utils/init");
 
 db.connect((err) => {
   if (err) throw err;
-  console.log("Databse is connected.");
+  console.log("Database is connected.");
   setTimeout(() => {
     init();
   }, 500);
