@@ -88,9 +88,8 @@ function vRoles() {
 }
 
 function vEmploy() {
-  const sql = `SELECT e.emp_id AS id, concat(e.first_name,' ', e.last_name) AS employee, e.role_title AS title, e.role_salary AS salary, e.dept_name AS dept,
-  CASE WHEN e.manager_id = e.emp_id THEN concat('N/A') ELSE concat(u.first_name, ' ', u.last_name) END AS manager,
-  FROM (SELECT * FROM employess LEFT JOIN roles ON employees.role_id = roles.r_id LEFT JOIN dept ON roles.dept_id = dept.dept_id) AS e, employees u WHERE u.e_id = e.manager_id`;
+  const sql = `SELECT e.emp_id AS id, concat(e.first_name,' ', e.last_name) AS employee, e.role_title AS title, e.role_salary AS salary, e.department_name AS dept,
+  CASE WHEN e.manager_id = e.emp_id THEN concat('N/A') ELSE concat(u.first_name, ' ', u.last_name) END AS manager FROM (SELECT * FROM employees LEFT JOIN emp_role ON employees.r_id = emp_role.role_id LEFT JOIN dept ON emp_role.department_id = dept.dept_id) AS e, employees u WHERE u.emp_id = e.manager_id`;
   db.query(sql, (err, rows) => {
     if (err) {
       console.log(err.message);
