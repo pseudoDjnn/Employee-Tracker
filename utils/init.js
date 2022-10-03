@@ -151,7 +151,41 @@ function vEmployDept() {
 
 function aRole() {}
 
-function aDept() {}
+function aDept() {
+  inquirer
+    .prompt([
+      {
+        type: "text",
+        name: "deptAdd",
+        message: "Create a new department:",
+      },
+    ])
+    .then(({ deptAdd }) => {
+      const sql = `INSERT INTO dept (dept_name) VALUES (?)`;
+      const query = [deptAdd];
+      db.query(sql, query, (err, rows) => {
+        if (err) {
+          console.log(err.message);
+        }
+        console.log("");
+        console.log("Wonderful!");
+        inquirer
+          .prompt({
+            type: "confirm",
+            name: "result",
+            message: "Added result is shown.",
+          })
+          .then(({ result }) => {
+            if (result) {
+              console.log("");
+              vDepts();
+            } else {
+              mainMenu();
+            }
+          });
+      });
+    });
+}
 
 function aEmployee() {}
 
