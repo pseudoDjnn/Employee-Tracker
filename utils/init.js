@@ -164,53 +164,79 @@ function aRole() {
     });
   });
   grabDepartment.then((deptArray) => {
-    inquirer.prompt([
-      {
-        type: "list",
-        name: "departmentId",
-        message: "Please select a department",
-        choices: deptArray,
-        filter: (idInput) => {
-          if (idInput) {
-            return deptArray.indexOf(idInput);
-          }
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          name: "departmentId",
+          message: "Please select a department",
+          choices: deptArray,
+          filter: (idInput) => {
+            if (idInput) {
+              return deptArray.indexOf(idInput);
+            }
+          },
         },
-      },
-      {
-        type: "text",
-        name: "titleOfRole",
-        message: "Enter the role you wish to add:",
-        validate: (titleInput) => {
-          if (titleInput) {
-            return true;
-          } else {
-            console.log("You must enter a title for the role you wish to add.");
-            return false;
-          }
+        {
+          type: "text",
+          name: "titleOfRole",
+          message: "Enter the role you wish to add:",
+          validate: (titleInput) => {
+            if (titleInput) {
+              return true;
+            } else {
+              console.log(
+                "You must enter a title for the role you wish to add."
+              );
+              return false;
+            }
+          },
         },
-      },
-      {
-        type: "number",
-        name: "salaryInputId",
-        message: "Enter the salary of the role you just entered:",
-        validate: (salaryInput) => {
-          if (!salaryInput || salaryInput === NaN) {
-            console.log("");
-            console.log("Please enter a valid numerical and do not format");
-            return false;
-          } else {
-            return true;
-          }
+        {
+          type: "number",
+          name: "salaryInputId",
+          message: "Enter the salary of the role you just entered:",
+          validate: (salaryInput) => {
+            if (!salaryInput || salaryInput === NaN) {
+              console.log("");
+              console.log("Please enter a valid numerical and do not format");
+              return false;
+            } else {
+              return true;
+            }
+          },
+          filter: (salaryInput) => {
+            if (!salaryInput || salaryInput === NaN) {
+              return "";
+            } else {
+              return salaryInput;
+            }
+          },
         },
-        filter: (salaryInput) => {
-          if (!salaryInput || salaryInput === NaN) {
-            return "";
-          } else {
-            return salaryInput;
+      ])
+      .then(({ departmentId, titleInput, salaryInput }) => {
+        const sql = `INSERT INTO emp_role (dept_id, role_title, role_salary) VALUES (?,?,?)`;
+        const query = [departmentId + 1, titleInput, salaryInput];
+        db.query(sql, (err, rows) => {
+          if (err) {
+            console.log(err.message);
           }
-        },
-      },
-    ]);
+          console.log("");
+          console.log("                    Success!");
+          inquirer
+            .prompt({
+              type: "confirm",
+              name: "result",
+              message: "Is everthing correct?",
+            })
+            .then(({ result }) => {
+              if (result) {
+                console.log("");
+                vRoles();
+              } else mainMenu();
+            });
+        });
+      });
   });
 }
 
