@@ -323,7 +323,36 @@ function aEmployee() {
   });
 }
 
-function updateEmploy() {}
+function updateEmploy() {
+  const grabTitle = new Promise((resolve, reject) => {
+    let titleArray = [];
+    const sql = `SELECT role_title from emp_role`;
+    db.query(sql, (err, rows) => {
+      if (err) {
+        console.log(err.message);
+      }
+      for (let i = 0; i < rows.length; i++) {
+        titleArray.push(Object.values(rows[i])[0]);
+      }
+      resolve(titleArray);
+    });
+  });
+  const grabEmployee = new Promise((resolve, reject) => {
+    let employeeArray = [];
+    const sql = `SELECT first_name, last_name FROM employees`;
+    db.query(sql, (err, rows) => {
+      if (err) {
+        console.log(err.message);
+      }
+      for (let i = 0; i < rows.length; i++) {
+        employeeArray.push(
+          Object.keys(rows[i])[0] + " " + Object.values(rows[i])[1]
+        );
+      }
+      resolve(employeeArray);
+    });
+  });
+}
 
 function endInit() {
   console.log("");
