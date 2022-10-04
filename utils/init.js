@@ -150,7 +150,7 @@ function vEmployDept() {
 }
 
 function aRole() {
-  const getDepartments = new Promise((resolve, reject) => {
+  const grabDepartment = new Promise((resolve, reject) => {
     let deptArray = [];
     const sql = `SELECT department_name FROM dept`;
     db.query(sql, (err, rows) => {
@@ -162,6 +162,21 @@ function aRole() {
       }
       resolve(deptArray);
     });
+  });
+  grabDepartment.then((deptArray) => {
+    inquirer.prompt([
+      {
+        type: "list",
+        name: "departmentId",
+        message: "Please select a department",
+        choices: deptArray,
+        filter: (idInput) => {
+          if (idInput) {
+            return deptArray.indexOf(idInput);
+          }
+        },
+      },
+    ]);
   });
 }
 
