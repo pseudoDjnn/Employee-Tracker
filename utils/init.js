@@ -176,6 +176,19 @@ function aRole() {
           }
         },
       },
+      {
+        type: "text",
+        name: "titleOfRole",
+        message: "Enter the title of role",
+        validate: (titleInput) => {
+          if (titleInput) {
+            return true;
+          } else {
+            console.log("You must enter a title for the role you wish to add.");
+            return false;
+          }
+        },
+      },
     ]);
   });
 }
