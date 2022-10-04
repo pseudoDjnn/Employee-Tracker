@@ -149,7 +149,21 @@ function vEmployDept() {
   });
 }
 
-function aRole() {}
+function aRole() {
+  const getDepartments = new Promise((resolve, reject) => {
+    let deptArray = [];
+    const sql = `SELECT department_name FROM dept`;
+    db.query(sql, (err, rows) => {
+      if (err) {
+        console.log(err.message);
+      }
+      for (let i = 0; i < rows.length; i++) {
+        deptArray.push(Object.values(rows[i])[0]);
+      }
+      resolve(deptArray);
+    });
+  });
+}
 
 function aDept() {
   inquirer
