@@ -346,12 +346,64 @@ function updateEmploy() {
       }
       for (let i = 0; i < rows.length; i++) {
         employeeArray.push(
-          Object.keys(rows[i])[0] + " " + Object.values(rows[i])[1]
+          Object.values(rows[i])[0] + " " + Object.values(rows[i])[1]
         );
       }
       resolve(employeeArray);
     });
   });
+  Promise.all([grabTitle, grabEmployee])
+    .then(([titleArray, employeeArray]) => {
+      inquirer.prompt([
+        {
+          type: "list",
+          name: "emplyoeesName",
+          message: "Who are we updating?",
+          choices: employeeArray,
+          filter: (nameInput) => {
+            if (nameInput) {
+              return employeeArray.indexOf(nameInput);
+            }
+          },
+        },
+        {
+          type: "list",
+          name: "employeesRole",
+          message: "What role will you now select for the employee?",
+          choices: titleArray,
+          filter: (roleInput) => {
+            if (roleInput) {
+              return titleArray.indexOf(roleInput);
+            }
+          },
+        },
+      ]);
+      .then(({ employeesName, employeesRole }) => {
+        const sql = `UPDATE employees SET r_id = ? WHERE emp_id = ?`;
+        const query = [employeesRole + 1, employeesName + 1];
+        db.query(sql, query, (err, rows) => {
+          if (err) {
+          console.log(err.message);
+        }
+        console.log("");
+        console.log("                 Role updated.");
+        inquirer
+        .prompt({
+          type: "confirm",
+          name: "result",
+          message: "Display results?",
+        })
+        .then(({ result }) => {
+          if (result) {
+            console.log("");
+            vEmploy();
+          } else {
+            mainMenu();
+          }
+        });
+      });
+    });
+  })
 }
 
 function endInit() {
