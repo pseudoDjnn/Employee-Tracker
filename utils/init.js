@@ -276,7 +276,52 @@ function aDept() {
     });
 }
 
-function aEmployee() {}
+function aEmployee() {
+  const grabTitle = new Promise((resolve, reject) => {
+    let titleArray = [];
+    const sql = `SELECT role_title From emp_role`;
+    db.query(sql, (err, rows) => {
+      if (err) {
+        console.log(err.message);
+      }
+      for (let i = 0; i < rows.length; i++) {
+        titleArray.push(Object.values(rows[i])[0]);
+      }
+      resolve(titleArray);
+    });
+  });
+  const getManagerSelection = new Promise((resolve, reject) => {
+    let managerSelectionArray = [];
+    const sql = `SELECT DISTINCT concat(m.first_name, ' ', m.last_name)
+                AS manager FROM employees e, employees m
+                WHERE m.emp_id = e.manager_id`;
+    db.query(sql, (err, rows) => {
+      if (err) {
+        console.log(err.message);
+      }
+      for (let i = 0; i < rows.length; i++) {
+        managerSelectionArray.push(Object.values(rows[i])[0]);
+      }
+      managerSelectionArray.push("Show more");
+      resolve(managerSelectionArray);
+    });
+  });
+  const managerList = new Promise((resolve, reject) => {
+    let managerIdList = [];
+    const sql = `SELECT DISTINCT m.emp_id AS manager
+                  FROM employees e, employees m
+                  WHERE m.emp_id = e.manager_id`;
+    db.query(sql, (err, rows) => {
+      if (err) {
+        console.log(err.message);
+      }
+      for (let i = 0; i < rows.length; i++) {
+        managerIdList.push(Object.values(rows[i])[0]);
+      }
+      resolve(managerIdList);
+    });
+  });
+}
 
 function updateEmploy() {}
 
