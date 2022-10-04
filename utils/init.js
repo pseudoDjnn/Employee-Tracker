@@ -214,15 +214,15 @@ function aRole() {
           },
         },
       ])
-      .then(({ departmentId, titleInput, salaryInput }) => {
-        const sql = `INSERT INTO emp_role (dept_id, role_title, role_salary) VALUES (?,?,?)`;
-        const query = [departmentId + 1, titleInput, salaryInput];
-        db.query(sql, (err, rows) => {
+      .then(({ departmentId, titleOfRole, salaryInputId }) => {
+        const sql = `INSERT INTO emp_role (department_id, role_title, role_salary) VALUES (?,?,?)`;
+        const query = [departmentId + 1, titleOfRole, salaryInputId];
+        db.query(sql, query, (err, rows) => {
           if (err) {
             console.log(err.message);
           }
           console.log("");
-          console.log("                    Success!");
+          console.log("                         Success!");
           inquirer
             .prompt({
               type: "confirm",
