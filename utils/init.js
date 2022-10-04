@@ -179,13 +179,34 @@ function aRole() {
       {
         type: "text",
         name: "titleOfRole",
-        message: "Enter the title of role",
+        message: "Enter the role you wish to add:",
         validate: (titleInput) => {
           if (titleInput) {
             return true;
           } else {
             console.log("You must enter a title for the role you wish to add.");
             return false;
+          }
+        },
+      },
+      {
+        type: "number",
+        name: "salaryInputId",
+        message: "Enter the salary of the role you just entered:",
+        validate: (salaryInput) => {
+          if (!salaryInput || salaryInput === NaN) {
+            console.log("");
+            console.log("Please enter a valid numerical and do not format");
+            return false;
+          } else {
+            return true;
+          }
+        },
+        filter: (salaryInput) => {
+          if (!salaryInput || salaryInput === NaN) {
+            return "";
+          } else {
+            return salaryInput;
           }
         },
       },
