@@ -1,6 +1,6 @@
 const db = require("../db/connect");
-const cTable = require("console.table");
 const inquirer = require("inquirer");
+require("console.table");
 
 function init() {
   console.log("");
@@ -58,6 +58,7 @@ function mainMenu() {
     });
 }
 
+// VIEW DEPARTMENTS
 function vDepts() {
   const sql = `SELECT dept_id AS id, department_name AS name FROM dept`;
   db.query(sql, (err, rows) => {
@@ -72,6 +73,7 @@ function vDepts() {
   });
 }
 
+// VIEW ROLES
 function vRoles() {
   const sql = `SELECT role_id AS id, role_title AS title, department_name AS name, role_salary AS salary FROM emp_role
   LEFT JOIN dept ON emp_role.department_id = dept.dept_id`;
@@ -87,6 +89,7 @@ function vRoles() {
   });
 }
 
+// VIEW EMPLOYEES
 function vEmploy() {
   const sql = `SELECT e.emp_id AS id, concat(e.first_name,' ', e.last_name) AS employee, e.role_title AS title, e.role_salary AS salary, e.department_name AS dept,
   CASE WHEN e.manager_id = e.emp_id THEN concat('N/A') ELSE concat(m.first_name, ' ', m.last_name) END AS manager FROM (SELECT * FROM employees LEFT JOIN emp_role ON employees.r_id = emp_role.role_id LEFT JOIN dept ON emp_role.department_id = dept.dept_id) AS e, employees m WHERE m.emp_id = e.manager_id`;
@@ -101,6 +104,7 @@ function vEmploy() {
   });
 }
 
+// VIEW EMPLOYEES BY DEPARTMENT
 function vEmployDept() {
   const getDepartments = new Promise((resolve, reject) => {
     var departmentsArr = [];
@@ -109,13 +113,13 @@ function vEmployDept() {
       if (err) {
         console.log(err.message);
       }
+      // ROLE FOR LOOP
       for (var i = 0; i < rows.length; i++) {
         departmentsArr.push(Object.values(rows[i])[0]);
       }
       resolve(departmentsArr);
     });
   });
-
   getDepartments.then((departmentsArr) => {
     inquirer
       .prompt([
@@ -149,6 +153,7 @@ function vEmployDept() {
   });
 }
 
+// ADD ROLE FUNCTION
 function aRole() {
   const grabDepartment = new Promise((resolve, reject) => {
     let grabDeptArr = [];
@@ -157,6 +162,7 @@ function aRole() {
       if (err) {
         console.log(err.message);
       }
+      // ROLE FOR LOOP
       for (let i = 0; i < rows.length; i++) {
         grabDeptArr.push(Object.values(rows[i])[0]);
       }
@@ -240,6 +246,7 @@ function aRole() {
   });
 }
 
+// ADD DEPARTMENT FUNCTION
 function aDept() {
   inquirer
     .prompt([
@@ -275,8 +282,9 @@ function aDept() {
       });
     });
 }
-
+// ADD EMPLOYEE FUNCTION
 function aEmployee() {
+  // ROLE FUNCTION
   const grabTheTitle = new Promise((resolve, reject) => {
     var titlesArr = [];
     const sql = `SELECT role_title FROM emp_role`;
@@ -284,13 +292,14 @@ function aEmployee() {
       if (err) {
         console.log(err.message);
       }
+      // ROLE FOR LOOP
       for (var i = 0; i < rows.length; i++) {
         titlesArr.push(Object.values(rows[i])[0]);
       }
       resolve(titlesArr);
     });
   });
-
+  // MANAGER LIST
   const getActiveManagerList = new Promise((resolve, reject) => {
     var activeManagerArr = [];
     const sql = ` SELECT DISTINCT concat(m.first_name, ' ', m.last_name) 
@@ -300,14 +309,16 @@ function aEmployee() {
       if (err) {
         console.log(err.message);
       }
+      // ROLE FOR LOOP
       for (var i = 0; i < rows.length; i++) {
         activeManagerArr.push(Object.values(rows[i])[0]);
       }
+      // PUSH IF YOU WANT MANAGERS TO HAVE MANAGERS
       activeManagerArr.push("Show more");
       resolve(activeManagerArr);
     });
   });
-
+  // GRAB THE MANAGER LIST BY NAME
   const getManagerList = new Promise((resolve, reject) => {
     var managerArr = [];
     const sql = ` SELECT concat(m.first_name, ' ', m.last_name) 
@@ -316,13 +327,16 @@ function aEmployee() {
       if (err) {
         console.log(err.message);
       }
+      // ROLE FOR LOOP
       for (var i = 0; i < rows.length; i++) {
         managerArr.push(Object.values(rows[i])[0]);
       }
+      // RESOLVE NO MANAGEMENT
       managerArr.push("Employee does not have a manager");
       resolve(managerArr);
     });
   });
+  // GRAB THE MANAGER LIST BY ID
   const getManIdList = new Promise((resolve, reject) => {
     var manIdArr = [];
     const sql = ` SELECT DISTINCT m.emp_id AS manager 
@@ -332,13 +346,14 @@ function aEmployee() {
       if (err) {
         console.log(err.message);
       }
+      // ROLE FOR LOOP
       for (var i = 0; i < rows.length; i++) {
         manIdArr.push(Object.values(rows[i])[0]);
       }
       resolve(manIdArr);
     });
   });
-
+  // ASYNC PROMISE TO ASK QUESTIONS TO UPDATE DATABASE
   Promise.all([
     grabTheTitle,
     getActiveManagerList,
@@ -349,10 +364,10 @@ function aEmployee() {
       .prompt([
         {
           type: "text",
-          name: "firstname",
+          name: "first_name",
           message: "Employee First Name:",
-          validate: (firstnameInput) => {
-            if (firstnameInput) {
+          validate: (firstInput) => {
+            if (firstInput) {
               return true;
             } else {
               console.log("Please enter a first name!");
@@ -362,10 +377,10 @@ function aEmployee() {
         },
         {
           type: "text",
-          name: "lastname",
+          name: "last_name",
           message: "Employee Last Name:",
-          validate: (lastnameInput) => {
-            if (lastnameInput) {
+          validate: (lastInput) => {
+            if (lastInput) {
               return true;
             } else {
               console.log("Please enter a last name!");
@@ -378,9 +393,9 @@ function aEmployee() {
           name: "roleId",
           message: "Choose a role for the employee.",
           choices: titlesArr,
-          filter: (roleIdInput) => {
-            if (roleIdInput) {
-              return titlesArr.indexOf(roleIdInput) + 1;
+          filter: (roleInput) => {
+            if (roleInput) {
+              return titlesArr.indexOf(roleInput) + 1;
             }
           },
         },
@@ -418,12 +433,12 @@ function aEmployee() {
           },
         },
       ])
-      .then(({ firstname, lastname, roleId, managerID1, managerID2 }) => {
+      .then(({ first_name, last_name, roleId, managerID1, managerID2 }) => {
         const getManId = () => {
           if (isNaN(managerID1)) {
             if (isNaN(managerID2)) {
-              managerArr.push(firstname + " " + lastname);
-              return managerArr.indexOf(firstname + " " + lastname);
+              managerArr.push(first_name + " " + last_name);
+              return managerArr.indexOf(first_name + " " + last_name);
             } else {
               return managerID2;
             }
@@ -433,7 +448,7 @@ function aEmployee() {
         };
         const manId = getManId();
         const sql = `INSERT INTO employees (first_name, last_name, r_id, manager_id) VALUES (?,?,?,?)`;
-        const query = [firstname, lastname, roleId, manId];
+        const query = [first_name, last_name, roleId, manId];
         db.query(sql, query, (err, rows) => {
           if (err) {
             console.log(err.message);
