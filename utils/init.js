@@ -89,7 +89,7 @@ function vRoles() {
 
 function vEmploy() {
   const sql = `SELECT e.emp_id AS id, concat(e.first_name,' ', e.last_name) AS employee, e.role_title AS title, e.role_salary AS salary, e.department_name AS dept,
-  CASE WHEN e.manager_id = e.emp_id THEN concat('N/A') ELSE concat(u.first_name, ' ', u.last_name) END AS manager FROM (SELECT * FROM employees LEFT JOIN emp_role ON employees.r_id = emp_role.role_id LEFT JOIN dept ON emp_role.department_id = dept.dept_id) AS e, employees u WHERE u.emp_id = e.manager_id`;
+  CASE WHEN e.manager_id = e.emp_id THEN concat('N/A') ELSE concat(m.first_name, ' ', m.last_name) END AS manager FROM (SELECT * FROM employees LEFT JOIN emp_role ON employees.r_id = emp_role.role_id LEFT JOIN dept ON emp_role.department_id = dept.dept_id) AS e, employees m WHERE m.emp_id = e.manager_id`;
   db.query(sql, (err, rows) => {
     if (err) {
       console.log(err.message);
@@ -277,56 +277,196 @@ function aDept() {
 }
 
 function aEmployee() {
-  const grabTitle = new Promise((resolve, reject) => {
-    let titleArray = [];
-    const sql = `SELECT role_title From emp_role`;
+  // to get the job titles from our database
+  const getTitles = new Promise((resolve, reject) => {
+    var titlesArr = [];
+    const sql = `SELECT role_title FROM emp_role`;
     db.query(sql, (err, rows) => {
       if (err) {
         console.log(err.message);
       }
-      for (let i = 0; i < rows.length; i++) {
-        titleArray.push(Object.values(rows[i])[0]);
+      for (var i = 0; i < rows.length; i++) {
+        titlesArr.push(Object.values(rows[i])[0]); // same as in addRole()!
       }
-      resolve(titleArray);
+      resolve(titlesArr);
     });
   });
-  const getManagerSelection = new Promise((resolve, reject) => {
-    let managerSelectionArray = [];
-    const sql = `SELECT DISTINCT concat(m.first_name, ' ', m.last_name)
-                AS manager FROM employees e, employees m
-                WHERE m.emp_id = e.manager_id`;
+  // to get a list of managers for user to choose from
+  const getActiveManagerList = new Promise((resolve, reject) => {
+    var activeManagerArr = [];
+    const sql = ` SELECT DISTINCT concat(m.first_name, ' ', m.last_name) 
+                  AS manager FROM employees e, employees m 
+                  WHERE m.emp_id = e.manager_id  `;
     db.query(sql, (err, rows) => {
       if (err) {
         console.log(err.message);
       }
-      for (let i = 0; i < rows.length; i++) {
-        managerSelectionArray.push(Object.values(rows[i])[0]);
+      for (var i = 0; i < rows.length; i++) {
+        activeManagerArr.push(Object.values(rows[i])[0]);
       }
-      managerSelectionArray.push("Show more");
-      resolve(managerSelectionArray);
+      activeManagerArr.push("Show more");
+      resolve(activeManagerArr);
     });
   });
-  const managerList = new Promise((resolve, reject) => {
-    let managerIdList = [];
-    const sql = `SELECT DISTINCT m.emp_id AS manager
-                  FROM employees e, employees m
-                  WHERE m.emp_id = e.manager_id`;
+
+  const getManagerList = new Promise((resolve, reject) => {
+    var managerArr = [];
+    const sql = ` SELECT concat(m.first_name, ' ', m.last_name) 
+                  AS manager FROM employees m `;
     db.query(sql, (err, rows) => {
       if (err) {
         console.log(err.message);
       }
-      for (let i = 0; i < rows.length; i++) {
-        managerIdList.push(Object.values(rows[i])[0]);
+      for (var i = 0; i < rows.length; i++) {
+        managerArr.push(Object.values(rows[i])[0]);
       }
-      resolve(managerIdList);
+      managerArr.push("Employee does not have a manager");
+      resolve(managerArr);
     });
+  });
+  // we get the ids the same way
+  const getManIdList = new Promise((resolve, reject) => {
+    var manIdArr = [];
+    const sql = ` SELECT DISTINCT m.emp_id AS manager 
+                  FROM employees e, employees m 
+                  WHERE m.emp_id = e.manager_id `;
+    db.query(sql, (err, rows) => {
+      if (err) {
+        console.log(err.message);
+      }
+      for (var i = 0; i < rows.length; i++) {
+        manIdArr.push(Object.values(rows[i])[0]);
+      }
+      resolve(manIdArr);
+    });
+  });
+  // Promise.all([promises]) allows use to run multiple promises at once so we can pass through the data from each.
+  Promise.all([
+    getTitles,
+    getActiveManagerList,
+    getManagerList,
+    getManIdList,
+  ]).then(([titlesArr, activeManagerArr, managerArr, manIdArr]) => {
+    inquirer
+      .prompt([
+        {
+          type: "text",
+          name: "firstname",
+          message: "Employee First Name:",
+          validate: (firstnameInput) => {
+            if (firstnameInput) {
+              return true;
+            } else {
+              console.log("Please enter a first name!");
+              return false;
+            }
+          },
+        },
+        {
+          type: "text",
+          name: "lastname",
+          message: "Employee Last Name:",
+          validate: (lastnameInput) => {
+            if (lastnameInput) {
+              return true;
+            } else {
+              console.log("Please enter a last name!");
+              return false;
+            }
+          },
+        },
+        {
+          type: "list",
+          name: "roleId",
+          message: "Choose the employee's role title",
+          choices: titlesArr,
+          filter: (roleIdInput) => {
+            if (roleIdInput) {
+              return titlesArr.indexOf(roleIdInput) + 1;
+            }
+          },
+        },
+        {
+          type: "list",
+          name: "managerID1",
+          message: "Select name of manager",
+          choices: activeManagerArr,
+          filter: (managerID1Input) => {
+            if (managerID1Input === "Show more") {
+              return managerID1Input;
+            } else {
+              return activeManagerArr.indexOf(managerID1Input);
+            }
+          },
+        },
+        {
+          type: "list",
+          name: "managerID2",
+          message: "Select name of manager",
+          choices: managerArr,
+          filter: (managerID2Input) => {
+            if (managerID2Input === "Employee does not have a manager") {
+              return managerID2Input;
+            } else {
+              return managerArr.indexOf(managerID2Input) + 1;
+            }
+          },
+          when: ({ managerID1 }) => {
+            if (isNaN(managerID1) === true) {
+              return true;
+            } else {
+              return false;
+            }
+          },
+        },
+      ])
+      .then(({ firstname, lastname, roleId, managerID1, managerID2 }) => {
+        const getManId = () => {
+          if (isNaN(managerID1)) {
+            if (isNaN(managerID2)) {
+              managerArr.push(firstname + " " + lastname);
+              return managerArr.indexOf(firstname + " " + lastname);
+            } else {
+              return managerID2; // returns 1,2,3... etc depending on user input
+            }
+          } else {
+            return manIdArr[managerID1]; // we got the index of the validate statement of this question.
+            //since the tables are set up the same way we can use the same index to get the ids stored in manIdArr
+          }
+        };
+        const manId = getManId();
+        const sql = `INSERT INTO employees (first_name, last_name, r_id, manager_id) VALUES (?,?,?,?)`;
+        const query = [firstname, lastname, roleId, manId];
+        db.query(sql, query, (err, rows) => {
+          if (err) {
+            console.log(err.message);
+          } else {
+            console.log("");
+            console.log(`                                   Success!`);
+            inquirer
+              .prompt({
+                type: "confirm",
+                name: "results",
+                message: "See results?",
+              })
+              .then(({ results }) => {
+                if (results) {
+                  console.log("");
+                  vEmploy();
+                } else {
+                  mainMenu();
+                }
+              });
+          }
+        });
+      });
   });
 }
 
 function updateEmploy() {
   const grabTitle = new Promise((resolve, reject) => {
     let titleArray = [];
-    const sql = `SELECT role_title from emp_role`;
+    const sql = `SELECT role_title FROM emp_role`;
     db.query(sql, (err, rows) => {
       if (err) {
         console.log(err.message);
@@ -352,9 +492,9 @@ function updateEmploy() {
       resolve(employeeArray);
     });
   });
-  Promise.all([grabTitle, grabEmployee])
-    .then(([titleArray, employeeArray]) => {
-      inquirer.prompt([
+  Promise.all([grabTitle, grabEmployee]).then(([titleArray, employeeArray]) => {
+    inquirer
+      .prompt([
         {
           type: "list",
           name: "emplyoeesName",
@@ -377,33 +517,33 @@ function updateEmploy() {
             }
           },
         },
-      ]);
+      ])
       .then(({ employeesName, employeesRole }) => {
         const sql = `UPDATE employees SET r_id = ? WHERE emp_id = ?`;
         const query = [employeesRole + 1, employeesName + 1];
         db.query(sql, query, (err, rows) => {
           if (err) {
-          console.log(err.message);
-        }
-        console.log("");
-        console.log("                 Role updated.");
-        inquirer
-        .prompt({
-          type: "confirm",
-          name: "result",
-          message: "Display results?",
-        })
-        .then(({ result }) => {
-          if (result) {
-            console.log("");
-            vEmploy();
-          } else {
-            mainMenu();
+            console.log(err.message);
           }
+          console.log("");
+          console.log("                 Role updated.");
+          inquirer
+            .prompt({
+              type: "confirm",
+              name: "result",
+              message: "Display results?",
+            })
+            .then(({ result }) => {
+              if (result) {
+                console.log("");
+                vEmploy();
+              } else {
+                mainMenu();
+              }
+            });
         });
       });
-    });
-  })
+  });
 }
 
 function endInit() {
