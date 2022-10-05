@@ -1,10 +1,10 @@
 const db = require("../db/connect");
-const consoleTable = require("console.table");
+const cTable = require("console.table");
 const inquirer = require("inquirer");
 
 function init() {
   console.log("");
-  console.log(`
+  console.table(`
   ***********************************
   *                                 *
   *         Employee Tracker        *
@@ -151,29 +151,29 @@ function vEmployDept() {
 
 function aRole() {
   const grabDepartment = new Promise((resolve, reject) => {
-    let deptArray = [];
+    let grabDeptArr = [];
     const sql = `SELECT department_name FROM dept`;
     db.query(sql, (err, rows) => {
       if (err) {
         console.log(err.message);
       }
       for (let i = 0; i < rows.length; i++) {
-        deptArray.push(Object.values(rows[i])[0]);
+        grabDeptArr.push(Object.values(rows[i])[0]);
       }
-      resolve(deptArray);
+      resolve(grabDeptArr);
     });
   });
-  grabDepartment.then((deptArray) => {
+  grabDepartment.then((grabDeptArr) => {
     inquirer
       .prompt([
         {
           type: "list",
           name: "departmentId",
           message: "Please select a department",
-          choices: deptArray,
+          choices: grabDeptArr,
           filter: (idInput) => {
             if (idInput) {
-              return deptArray.indexOf(idInput);
+              return grabDeptArr.indexOf(idInput);
             }
           },
         },
@@ -250,7 +250,7 @@ function aDept() {
       },
     ])
     .then(({ deptAdd }) => {
-      const sql = `INSERT INTO dept (dept_name) VALUES (?)`;
+      const sql = `INSERT INTO dept (department_name) VALUES (?)`;
       const query = [deptAdd];
       db.query(sql, query, (err, rows) => {
         if (err) {
@@ -389,11 +389,11 @@ function aEmployee() {
           name: "managerID1",
           message: "Select name of manager",
           choices: activeManagerArr,
-          filter: (managerID1Input) => {
-            if (managerID1Input === "Show more") {
-              return managerID1Input;
+          filter: (mngrId01) => {
+            if (mngrId01 === "Show more") {
+              return mngrId01;
             } else {
-              return activeManagerArr.indexOf(managerID1Input);
+              return activeManagerArr.indexOf(mngrId01);
             }
           },
         },
@@ -402,11 +402,11 @@ function aEmployee() {
           name: "managerID2",
           message: "Select name of manager",
           choices: managerArr,
-          filter: (managerID2Input) => {
-            if (managerID2Input === "Employee does not have a manager") {
-              return managerID2Input;
+          filter: (mngrId02) => {
+            if (mngrId02 === "Employee does not have a manager") {
+              return mngrId02;
             } else {
-              return managerArr.indexOf(managerID2Input) + 1;
+              return managerArr.indexOf(mngrId02) + 1;
             }
           },
           when: ({ managerID1 }) => {
@@ -444,7 +444,7 @@ function aEmployee() {
               .prompt({
                 type: "confirm",
                 name: "results",
-                message: "See results?",
+                message: "Display results?",
               })
               .then(({ results }) => {
                 if (results) {
@@ -460,7 +460,9 @@ function aEmployee() {
   });
 }
 
+// UPDATE EMPLOYEE FUNCTION
 function updateEmploy() {
+  // ROLE FUNCTION
   const grabTheTitle = new Promise((resolve, reject) => {
     var titlesArr = [];
     const sql = `SELECT role_title FROM emp_role`;
@@ -468,13 +470,14 @@ function updateEmploy() {
       if (err) {
         console.log(err.message);
       }
+      // CP FROM ROLE FUNCTION
       for (var i = 0; i < rows.length; i++) {
         titlesArr.push(Object.values(rows[i])[0]); // same as in addRole()!
       }
       resolve(titlesArr);
     });
   });
-
+  // EMPLOYEE NAME FUNCTION
   const grabTheEmployees = new Promise((resolve, reject) => {
     var employeesArr = [];
     const sql = `SELECT first_name, last_name FROM employees`;
@@ -482,6 +485,7 @@ function updateEmploy() {
       if (err) {
         console.log(err.message);
       }
+      // CP FROM ROLE FUNCTION
       for (var i = 0; i < rows.length; i++) {
         employeesArr.push(
           Object.values(rows[i])[0] + " " + Object.values(rows[i])[1]
@@ -490,7 +494,7 @@ function updateEmploy() {
       resolve(employeesArr);
     });
   });
-
+  // ASYNC PROMISE
   Promise.all([grabTheTitle, grabTheEmployees]).then(
     ([titlesArr, employeesArr]) => {
       inquirer
@@ -547,6 +551,7 @@ function updateEmploy() {
   );
 }
 
+// END FUNCTION WITH TIMER TO SEND YOU TO LAST DIRECTORY
 function endInit() {
   console.log("");
   console.log("Thank you for using this application.");
