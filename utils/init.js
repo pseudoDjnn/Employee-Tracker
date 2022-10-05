@@ -277,8 +277,7 @@ function aDept() {
 }
 
 function aEmployee() {
-  // to get the job titles from our database
-  const getTitles = new Promise((resolve, reject) => {
+  const grabTheTitle = new Promise((resolve, reject) => {
     var titlesArr = [];
     const sql = `SELECT role_title FROM emp_role`;
     db.query(sql, (err, rows) => {
@@ -286,12 +285,12 @@ function aEmployee() {
         console.log(err.message);
       }
       for (var i = 0; i < rows.length; i++) {
-        titlesArr.push(Object.values(rows[i])[0]); // same as in addRole()!
+        titlesArr.push(Object.values(rows[i])[0]);
       }
       resolve(titlesArr);
     });
   });
-  // to get a list of managers for user to choose from
+
   const getActiveManagerList = new Promise((resolve, reject) => {
     var activeManagerArr = [];
     const sql = ` SELECT DISTINCT concat(m.first_name, ' ', m.last_name) 
@@ -324,7 +323,6 @@ function aEmployee() {
       resolve(managerArr);
     });
   });
-  // we get the ids the same way
   const getManIdList = new Promise((resolve, reject) => {
     var manIdArr = [];
     const sql = ` SELECT DISTINCT m.emp_id AS manager 
@@ -340,9 +338,9 @@ function aEmployee() {
       resolve(manIdArr);
     });
   });
-  // Promise.all([promises]) allows use to run multiple promises at once so we can pass through the data from each.
+
   Promise.all([
-    getTitles,
+    grabTheTitle,
     getActiveManagerList,
     getManagerList,
     getManIdList,
@@ -378,7 +376,7 @@ function aEmployee() {
         {
           type: "list",
           name: "roleId",
-          message: "Choose the employee's role title",
+          message: "Choose a role for the employee.",
           choices: titlesArr,
           filter: (roleIdInput) => {
             if (roleIdInput) {
@@ -427,11 +425,10 @@ function aEmployee() {
               managerArr.push(firstname + " " + lastname);
               return managerArr.indexOf(firstname + " " + lastname);
             } else {
-              return managerID2; // returns 1,2,3... etc depending on user input
+              return managerID2;
             }
           } else {
-            return manIdArr[managerID1]; // we got the index of the validate statement of this question.
-            //since the tables are set up the same way we can use the same index to get the ids stored in manIdArr
+            return manIdArr[managerID1];
           }
         };
         const manId = getManId();
@@ -464,86 +461,90 @@ function aEmployee() {
 }
 
 function updateEmploy() {
-  const grabTitle = new Promise((resolve, reject) => {
-    let titleArray = [];
+  const grabTheTitle = new Promise((resolve, reject) => {
+    var titlesArr = [];
     const sql = `SELECT role_title FROM emp_role`;
     db.query(sql, (err, rows) => {
       if (err) {
         console.log(err.message);
       }
-      for (let i = 0; i < rows.length; i++) {
-        titleArray.push(Object.values(rows[i])[0]);
+      for (var i = 0; i < rows.length; i++) {
+        titlesArr.push(Object.values(rows[i])[0]); // same as in addRole()!
       }
-      resolve(titleArray);
+      resolve(titlesArr);
     });
   });
-  const grabEmployee = new Promise((resolve, reject) => {
-    let employeeArray = [];
+
+  const grabTheEmployees = new Promise((resolve, reject) => {
+    var employeesArr = [];
     const sql = `SELECT first_name, last_name FROM employees`;
     db.query(sql, (err, rows) => {
       if (err) {
         console.log(err.message);
       }
-      for (let i = 0; i < rows.length; i++) {
-        employeeArray.push(
+      for (var i = 0; i < rows.length; i++) {
+        employeesArr.push(
           Object.values(rows[i])[0] + " " + Object.values(rows[i])[1]
-        );
+        ); // same as in addRole()!
       }
-      resolve(employeeArray);
+      resolve(employeesArr);
     });
   });
-  Promise.all([grabTitle, grabEmployee]).then(([titleArray, employeeArray]) => {
-    inquirer
-      .prompt([
-        {
-          type: "list",
-          name: "emplyoeesName",
-          message: "Who are we updating?",
-          choices: employeeArray,
-          filter: (nameInput) => {
-            if (nameInput) {
-              return employeeArray.indexOf(nameInput);
-            }
+
+  Promise.all([grabTheTitle, grabTheEmployees]).then(
+    ([titlesArr, employeesArr]) => {
+      inquirer
+        .prompt([
+          {
+            type: "list",
+            name: "employeeName",
+            message: "Which employee would you like to update?",
+            choices: employeesArr,
+            filter: (employeeNameInput) => {
+              if (employeeNameInput) {
+                return employeesArr.indexOf(employeeNameInput);
+              } //since the list will be ordered by id we can return the index and use that as e_id
+            },
           },
-        },
-        {
-          type: "list",
-          name: "employeesRole",
-          message: "What role will you now select for the employee?",
-          choices: titleArray,
-          filter: (roleInput) => {
-            if (roleInput) {
-              return titleArray.indexOf(roleInput);
-            }
-          },
-        },
-      ])
-      .then(({ employeesName, employeesRole }) => {
-        const sql = `UPDATE employees SET r_id = ? WHERE emp_id = ?`;
-        const query = [employeesRole + 1, employeesName + 1];
-        db.query(sql, query, (err, rows) => {
-          if (err) {
-            console.log(err.message);
-          }
-          console.log("");
-          console.log("                 Role updated.");
-          inquirer
-            .prompt({
-              type: "confirm",
-              name: "result",
-              message: "Display results?",
-            })
-            .then(({ result }) => {
-              if (result) {
-                console.log("");
-                vEmploy();
-              } else {
-                mainMenu();
+          {
+            type: "list",
+            name: "employeeRole",
+            message: "Select the new role for this employee.",
+            choices: titlesArr,
+            filter: (employeeRoleInput) => {
+              if (employeeRoleInput) {
+                return titlesArr.indexOf(employeeRoleInput);
               }
-            });
+            },
+          },
+        ])
+        .then(({ employeeName, employeeRole }) => {
+          const sql = `UPDATE employees SET r_id = ? WHERE emp_id = ?`;
+          const query = [employeeRole + 1, employeeName + 1];
+          db.query(sql, query, (err, rows) => {
+            if (err) {
+              console.log(err.message);
+            }
+            console.log("");
+            console.log(`             Success!`);
+            inquirer
+              .prompt({
+                type: "confirm",
+                name: "results",
+                message: "Care to display the results?",
+              })
+              .then(({ results }) => {
+                if (results) {
+                  console.log("");
+                  vEmploy();
+                } else {
+                  mainMenu();
+                }
+              });
+          });
         });
-      });
-  });
+    }
+  );
 }
 
 function endInit() {
