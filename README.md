@@ -44,6 +44,8 @@
     ```
     npm start
     ```
+    
+    * [Video_Showcase](https://drive.google.com/file/d/1ON_bEciwWpxL6E3Or3HHDafI_p17c4Lp/view)
 
 ![employee_tracker](https://user-images.githubusercontent.com/105378214/194098468-b9d2ddee-a731-4ee6-9bf0-053e6f5d6e35.png)
 
