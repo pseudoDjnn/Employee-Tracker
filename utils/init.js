@@ -22,7 +22,7 @@ function mainMenu() {
     .prompt({
       type: "list",
       name: "home",
-      message: "Please slecect a choice.",
+      message: "Please select a choice.",
       choices: [
         "View our departments",
         "View all roles",
